@@ -4,7 +4,7 @@ const express = require('express')
 
 const bodyParser = require('body-parser')
 
-const urlencodedParser = bodyParser.urlencoded({ extended: false })
+const urlencodedParser = bodyParser.urlencoded({ limit: '50mb', extended: false })
 
 const server = express()
 
@@ -18,6 +18,32 @@ function getUrl(url, props, res) {
     const page = await browser.newPage();
 
     await page.goto(url, { waitUntil: 'networkidle0' })
+
+    const pdfBuffer = await page.pdf({
+      format: 'A4',
+      landscape: props.landscape
+    });
+
+    res.writeHead(200, {
+      'Content-Type': 'application/pdf',
+      'Content-Length': pdfBuffer.length
+    });
+    res.end(pdfBuffer);
+
+    await browser.close();
+  })()
+}
+
+function getHtml(html, props, res) {
+  (async () => {
+    const browser = await puppeteer.launch({
+      headless: true,
+      args: ['--disable-dev-shm-usage', '--no-sandbox', '--disable-setuid-sandbox', '--allow-file-access-from-files', '--enable-local-file-accesses', '--disable-web-security']
+    });
+
+    const page = await browser.newPage();
+
+    await page.setContent(html, { waitUntil: 'networkidle0' });
 
     const pdfBuffer = await page.pdf({
       format: 'A4',
@@ -49,6 +75,10 @@ server.post('/', urlencodedParser, function (req, res) {
 
   if (url) {
     getUrl(url, props, res)
+  }
+
+  if (html) {
+    getHtml(html, props, res)
   }
 });
 
