@@ -1,0 +1,26 @@
+kind: pipeline
+name: default
+
+steps:
+  - name: build-image  
+    image: plugins/docker
+    settings:
+      repo: tohtamysh/pdf-server
+      tags:
+        - latest
+      username:
+        from_secret: docker_username
+      password:
+        from_secret: docker_password
+
+  - name: send telegram notification
+    image: appleboy/drone-telegram
+    when:
+      status:
+        - success
+        - failure
+    settings:
+      token:
+        from_secret: telegram_token
+      to:
+        from_secret: telegram_user_id
