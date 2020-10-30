@@ -1,12 +1,12 @@
 const puppeteer = require('puppeteer');
 
-const express = require('express')
+const express = require('express');
 
-const bodyParser = require('body-parser')
+const bodyParser = require('body-parser');
 
-const urlencodedParser = bodyParser.urlencoded({ limit: '50mb', extended: false })
+const urlencodedParser = bodyParser.urlencoded({ limit: '50mb', extended: false });
 
-const server = express()
+const server = express();
 
 function getUrl(url, props, res) {
   (async () => {
@@ -61,27 +61,27 @@ function getHtml(html, props, res) {
 }
 
 server.post('/', urlencodedParser, function (req, res) {
-  const url = req.body.url ? req.body.url : null
+  const url = req.body.url ? req.body.url : null;
 
-  const html = req.body.html ? req.body.html : null
+  const html = req.body.html ? req.body.html : null;
 
-  const landscape = new Boolean(req.body.landscape)
+  const landscape = new Boolean(req.body.landscape);
 
   const props = {
     landscape: landscape,
   }
 
-  if (!url && !html) return res.sendStatus(400)
+  if (!url && !html) return res.sendStatus(400);
 
   if (url) {
-    getUrl(url, props, res)
+    getUrl(url, props, res);
   }
 
   if (html) {
-    getHtml(html, props, res)
+    getHtml(html, props, res);
   }
 });
 
 server.listen(8000, () => {
-  console.log('Server started!')
-})
+  console.log('Server started!');
+});
