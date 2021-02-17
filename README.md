@@ -13,4 +13,4 @@ Request params
 | ------ | ------ |
 | url | page adress (eg. https://google.com) |
 | html | string html page |
-| landscape | pdf orientation (eg. true|false) |
+| landscape | pdf orientation (eg. true or null) |
