@@ -53,6 +53,8 @@ func handle(w http.ResponseWriter, r *http.Request) {
 		buf = htmlToPDF(ctx, html, pdfParams)
 	}
 
+	fmt.Println("pdf ready")
+
 	w.WriteHeader(http.StatusOK)
 	w.Header().Set("Content-Type", "application/pdf")
 	w.Write(buf)
