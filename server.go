@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bytes"
 	"context"
 	"fmt"
 	"github.com/chromedp/cdproto/page"
 	"github.com/chromedp/chromedp"
-	"io"
 	"log"
 	"net/http"
 )
@@ -42,7 +40,10 @@ func urlToPDF(w http.ResponseWriter, r *http.Request) {
 			log.Fatal(err)
 		}
 
-		io.Copy(w, bytes.NewBuffer(buf))
+		w.WriteHeader(http.StatusOK)
+		w.Header().Set("Content-Type", "application/pdf")
+		w.Write(buf)
+		return
 	}
 }
 
