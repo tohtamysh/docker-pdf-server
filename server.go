@@ -7,6 +7,7 @@ import (
 	"github.com/chromedp/chromedp"
 	"log"
 	"net/http"
+	"sync"
 )
 
 type PDFParams struct {
@@ -81,6 +82,19 @@ func getURL(url string, params PDFParams, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Navigate(url),
 		chromedp.ActionFunc(func(ctx context.Context) error {
+			lctx, cancel := context.WithCancel(ctx)
+			defer cancel()
+			var wg sync.WaitGroup
+			wg.Add(1)
+			chromedp.ListenTarget(lctx, func(ev interface{}) {
+				if _, ok := ev.(*page.EventLoadEventFired); ok {
+					cancel()
+					wg.Done()
+				}
+			})
+			return nil
+		}),
+		chromedp.ActionFunc(func(ctx context.Context) error {
 			buf, _, err := page.PrintToPDF().WithLandscape(params.OrientationLandscape).WithPrintBackground(false).Do(ctx)
 			if err != nil {
 				return err
@@ -96,12 +110,27 @@ func getHTML(html string, params PDFParams, res *[]byte) chromedp.Tasks {
 	return chromedp.Tasks{
 		chromedp.Navigate("about:blank"),
 		chromedp.ActionFunc(func(ctx context.Context) error {
+			lctx, cancel := context.WithCancel(ctx)
+			defer cancel()
+			var wg sync.WaitGroup
+			wg.Add(1)
+			chromedp.ListenTarget(lctx, func(ev interface{}) {
+				if _, ok := ev.(*page.EventLoadEventFired); ok {
+					cancel()
+					wg.Done()
+				}
+			})
+
 			frameTree, err := page.GetFrameTree().Do(ctx)
 			if err != nil {
 				return err
 			}
 
-			return page.SetDocumentContent(frameTree.Frame.ID, html).Do(ctx)
+			if err := page.SetDocumentContent(frameTree.Frame.ID, html).Do(ctx); err != nil {
+				return err
+			}
+			wg.Wait()
+			return nil
 		}),
 		chromedp.ActionFunc(func(ctx context.Context) error {
 			buf, _, err := page.PrintToPDF().WithLandscape(params.OrientationLandscape).WithPrintBackground(false).Do(ctx)
