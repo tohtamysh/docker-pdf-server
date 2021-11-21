@@ -14,7 +14,7 @@ RUN apt-get update && apt-get install dumb-init
 
 COPY --from=build /src/server /server
 
-EXPOSE 80
+EXPOSE 8000
 
 ENTRYPOINT ["dumb-init", "--"]
 
