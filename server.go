@@ -19,7 +19,7 @@ func main() {
 	http.HandleFunc("/url", urlToPDF)
 
 	fmt.Printf("Starting server...\n")
-	if err := http.ListenAndServe(":80", nil); err != nil {
+	if err := http.ListenAndServe(":8000", nil); err != nil {
 		log.Fatal(err)
 	}
 }
@@ -47,6 +47,7 @@ func urlToPDF(w http.ResponseWriter, r *http.Request) {
 }
 
 func getURL(url string, params PDFParams, res *[]byte) chromedp.Tasks {
+	fmt.Println("Go to ", url)
 	return chromedp.Tasks{
 		chromedp.Navigate(url),
 		chromedp.ActionFunc(func(ctx context.Context) error {
